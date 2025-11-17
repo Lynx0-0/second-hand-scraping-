@@ -46,10 +46,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_REQUESTS: int = 10  # Richieste
     RATE_LIMIT_PERIOD: int = 60  # Per periodo in secondi (10 richieste/minuto)
 
-    # Scraper
-    SCRAPER_REQUESTS_PER_SECOND: float = 0.5
-    SCRAPER_MIN_DELAY: float = 2.0
-    SCRAPER_MAX_DELAY: float = 5.0
+    # Scraper - Parametri aumentati per evitare blocchi da Subito.it
+    SCRAPER_REQUESTS_PER_SECOND: float = 0.2  # 1 richiesta ogni 5 secondi
+    SCRAPER_MIN_DELAY: float = 5.0  # Minimo 5 secondi tra richieste
+    SCRAPER_MAX_DELAY: float = 15.0  # Massimo 15 secondi tra richieste
     SCRAPER_MAX_RETRIES: int = 3
     SCRAPER_TIMEOUT: int = 30
 
