@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBar from './components/SearchBar';
 import ProductGrid from './components/ProductGrid';
+import SearchProgress from './components/SearchProgress';
 import api from './services/api';
 
 function App() {
@@ -8,6 +9,28 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchInfo, setSearchInfo] = useState(null);
+  const [apiStatus, setApiStatus] = useState('checking');
+  const [stats, setStats] = useState({
+    totalSearches: 0,
+    currentSession: 0,
+  });
+
+  // Check API status on mount
+  useEffect(() => {
+    const checkApiHealth = async () => {
+      try {
+        await api.healthCheck();
+        setApiStatus('connected');
+      } catch {
+        setApiStatus('disconnected');
+      }
+    };
+
+    checkApiHealth();
+    // Check every 30 seconds
+    const interval = setInterval(checkApiHealth, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSearch = async (searchParams) => {
     setLoading(true);
@@ -28,6 +51,12 @@ function App() {
         cached: response.cached,
         executionTime: response.execution_time_ms,
       });
+
+      // Update stats
+      setStats((prev) => ({
+        totalSearches: prev.totalSearches + 1,
+        currentSession: prev.currentSession + 1,
+      }));
     } catch (err) {
       console.error('Errore ricerca:', err);
 
@@ -44,33 +73,76 @@ function App() {
       }
 
       setError(errorMessage);
+      setApiStatus('disconnected');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-md border-b border-gray-200">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <span className="text-4xl">🔍</span>
+              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 flex items-center gap-3">
+                <span className="text-5xl">🔍</span>
                 Subito Scraper
               </h1>
-              <p className="text-gray-600 mt-1">
-                Cerca annunci usati con rilevamento truffe automatico
+              <p className="text-gray-600 mt-2 text-base">
+                Cerca annunci usati con rilevamento truffe automatico intelligente
               </p>
             </div>
 
-            {/* API Status Indicator */}
-            <div className="hidden md:block">
-              <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-green-800 font-medium">API Connessa</span>
+            {/* Stats & API Status */}
+            <div className="hidden md:flex flex-col gap-2">
+              {/* API Status Indicator */}
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
+                  apiStatus === 'connected'
+                    ? 'bg-green-50 border-green-200'
+                    : apiStatus === 'disconnected'
+                    ? 'bg-red-50 border-red-200'
+                    : 'bg-yellow-50 border-yellow-200'
+                }`}
+              >
+                <div
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    apiStatus === 'connected'
+                      ? 'bg-green-500 animate-pulse'
+                      : apiStatus === 'disconnected'
+                      ? 'bg-red-500'
+                      : 'bg-yellow-500 animate-pulse'
+                  }`}
+                ></div>
+                <span
+                  className={`text-sm font-semibold ${
+                    apiStatus === 'connected'
+                      ? 'text-green-800'
+                      : apiStatus === 'disconnected'
+                      ? 'text-red-800'
+                      : 'text-yellow-800'
+                  }`}
+                >
+                  {apiStatus === 'connected'
+                    ? '✓ API Connessa'
+                    : apiStatus === 'disconnected'
+                    ? '✗ API Offline'
+                    : '⟳ Controllo...'}
+                </span>
               </div>
+
+              {/* Session Stats */}
+              {stats.currentSession > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                  <span className="text-2xl">📊</span>
+                  <span className="text-sm text-blue-800 font-medium">
+                    {stats.currentSession} ricerca{stats.currentSession > 1 ? 'he' : ''} effettuata
+                    {stats.currentSession > 1 ? 'e' : ''}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -81,37 +153,45 @@ function App() {
         {/* Search Bar */}
         <SearchBar onSearch={handleSearch} loading={loading} />
 
-        {/* Search Info */}
+        {/* Search Progress */}
+        <SearchProgress isSearching={loading} />
+
+        {/* Search Info - Enhanced */}
         {searchInfo && !loading && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <div className="flex flex-wrap items-center gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">Query:</span>
-                <span className="font-semibold text-gray-900 ml-2">{searchInfo.query}</span>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 mb-6 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <span className="text-2xl">✅</span>
+                Ricerca Completata
+              </h3>
+              {searchInfo.cached && (
+                <span className="px-3 py-1.5 bg-purple-100 text-purple-800 rounded-full text-xs font-bold flex items-center gap-1">
+                  <span className="text-base">⚡</span>
+                  RISULTATI DA CACHE
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white rounded-lg p-3 border border-blue-100">
+                <div className="text-xs text-gray-500 mb-1">Query</div>
+                <div className="font-bold text-gray-900 truncate">{searchInfo.query}</div>
               </div>
               {searchInfo.categoria && (
-                <div>
-                  <span className="text-gray-600">Categoria:</span>
-                  <span className="font-semibold text-gray-900 ml-2">{searchInfo.categoria}</span>
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <div className="text-xs text-gray-500 mb-1">Categoria</div>
+                  <div className="font-bold text-gray-900 truncate">{searchInfo.categoria}</div>
                 </div>
               )}
-              <div>
-                <span className="text-gray-600">Risultati:</span>
-                <span className="font-semibold text-gray-900 ml-2">{searchInfo.total}</span>
+              <div className="bg-white rounded-lg p-3 border border-blue-100">
+                <div className="text-xs text-gray-500 mb-1">Risultati Trovati</div>
+                <div className="font-bold text-blue-600 text-xl">{searchInfo.total}</div>
               </div>
-              <div>
-                <span className="text-gray-600">Tempo:</span>
-                <span className="font-semibold text-gray-900 ml-2">
+              <div className="bg-white rounded-lg p-3 border border-blue-100">
+                <div className="text-xs text-gray-500 mb-1">Tempo Esecuzione</div>
+                <div className="font-bold text-green-600 text-xl">
                   {(searchInfo.executionTime / 1000).toFixed(2)}s
-                </span>
-              </div>
-              {searchInfo.cached && (
-                <div className="ml-auto">
-                  <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-semibold">
-                    ⚡ Da cache
-                  </span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}
@@ -119,29 +199,77 @@ function App() {
         {/* Product Grid */}
         <ProductGrid listings={listings} loading={loading} error={error} />
 
-        {/* Empty State (initial) */}
+        {/* Empty State (initial) - Enhanced */}
         {!loading && !error && listings.length === 0 && !searchInfo && (
-          <div className="text-center py-16">
-            <div className="max-w-md mx-auto">
-              <div className="text-6xl mb-6">🔍</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Inizia una ricerca
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Cerca annunci di prodotti usati su Subito.it. Il nostro sistema
-                analizzerà automaticamente ogni annuncio per rilevare possibili truffe.
-              </p>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left">
-                <h3 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
-                  <span>💡</span>
-                  Suggerimenti
+          <div className="text-center py-12">
+            <div className="max-w-3xl mx-auto">
+              {/* Hero Section */}
+              <div className="mb-8">
+                <div className="text-7xl mb-6 animate-bounce">🔍</div>
+                <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
+                  Benvenuto su Subito Scraper
+                </h2>
+                <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                  Il tuo assistente intelligente per cercare annunci di prodotti usati su Subito.it
+                  con un potente sistema di <span className="font-bold text-blue-600">rilevamento truffe automatico</span>.
+                </p>
+              </div>
+
+              {/* Features Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                  <div className="text-4xl mb-3">🛡️</div>
+                  <h3 className="font-bold text-gray-900 mb-2">Protezione Anti-Truffa</h3>
+                  <p className="text-sm text-gray-600">
+                    Analisi automatica degli annunci per rilevare possibili truffe
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                  <div className="text-4xl mb-3">⚡</div>
+                  <h3 className="font-bold text-gray-900 mb-2">Risultati Veloci</h3>
+                  <p className="text-sm text-gray-600">
+                    Cache intelligente per risposte istantanee
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                  <div className="text-4xl mb-3">🎯</div>
+                  <h3 className="font-bold text-gray-900 mb-2">Filtri Avanzati</h3>
+                  <p className="text-sm text-gray-600">
+                    Categoria, prezzo e regione per risultati precisi
+                  </p>
+                </div>
+              </div>
+
+              {/* Tips Section */}
+              <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-6 text-left shadow-md">
+                <h3 className="font-bold text-yellow-900 mb-4 flex items-center gap-2 text-lg">
+                  <span className="text-2xl">💡</span>
+                  Come iniziare
                 </h3>
-                <ul className="text-sm text-yellow-800 space-y-1">
-                  <li>• Prova ricerche come "iPhone 13", "MacBook Pro", "Bicicletta"</li>
-                  <li>• Usa i filtri per raffinare la ricerca</li>
-                  <li>• Il badge rosso indica annunci ad alto rischio truffa</li>
-                  <li>• Clicca sul badge per vedere i dettagli di sicurezza</li>
-                </ul>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                      <span>🔸</span>
+                      Suggerimenti di Ricerca
+                    </h4>
+                    <ul className="text-sm text-yellow-800 space-y-1.5">
+                      <li>• Prova: "iPhone 13", "MacBook Pro", "Bicicletta"</li>
+                      <li>• Sii specifico per risultati migliori</li>
+                      <li>• Usa i filtri per raffinare la ricerca</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                      <span>🔸</span>
+                      Indicatori di Sicurezza
+                    </h4>
+                    <ul className="text-sm text-yellow-800 space-y-1.5">
+                      <li>• <span className="font-bold text-red-600">Badge Rosso</span>: Alto rischio truffa</li>
+                      <li>• <span className="font-bold text-yellow-600">Badge Giallo</span>: Medio rischio</li>
+                      <li>• Clicca sul badge per vedere i dettagli</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
