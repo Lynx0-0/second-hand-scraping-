@@ -1,5 +1,11 @@
 import { useState } from 'react';
 
+const PLATFORMS = [
+  { value: 'subito', label: '🇮🇹 Subito.it', color: 'bg-blue-500' },
+  { value: 'ebay', label: '🌍 eBay', color: 'bg-yellow-500' },
+  { value: 'all', label: '🔍 Tutte le piattaforme', color: 'bg-purple-500' },
+];
+
 const CATEGORIES = [
   { value: '', label: 'Tutte le categorie' },
   { value: 'elettronica', label: 'Elettronica' },
@@ -26,6 +32,7 @@ const REGIONS = [
 
 export default function SearchBar({ onSearch, loading }) {
   const [query, setQuery] = useState('');
+  const [platform, setPlatform] = useState('subito');
   const [categoria, setCategoria] = useState('');
   const [prezzoMax, setPrezzoMax] = useState('');
   const [regione, setRegione] = useState('');
@@ -41,6 +48,7 @@ export default function SearchBar({ onSearch, loading }) {
 
     const searchParams = {
       query: query.trim(),
+      platform: platform,
       max_pages: 2, // Default 2 pages
     };
 
@@ -53,6 +61,7 @@ export default function SearchBar({ onSearch, loading }) {
 
   const handleReset = () => {
     setQuery('');
+    setPlatform('subito');
     setCategoria('');
     setPrezzoMax('');
     setRegione('');
@@ -61,6 +70,33 @@ export default function SearchBar({ onSearch, loading }) {
   return (
     <div className="bg-white shadow-md rounded-lg p-6 mb-6">
       <form onSubmit={handleSubmit}>
+        {/* Platform Selector */}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            Dove vuoi cercare?
+          </label>
+          <div className="flex gap-3">
+            {PLATFORMS.map((plat) => (
+              <button
+                key={plat.value}
+                type="button"
+                onClick={() => setPlatform(plat.value)}
+                disabled={loading}
+                className={`
+                  flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-200
+                  ${platform === plat.value
+                    ? `${plat.color} text-white shadow-lg transform scale-105`
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              >
+                {plat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Search Input */}
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
@@ -179,10 +215,15 @@ export default function SearchBar({ onSearch, loading }) {
       </form>
 
       {/* Active Filters Display */}
-      {(categoria || prezzoMax || regione) && (
+      {(platform !== 'subito' || categoria || prezzoMax || regione) && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex flex-wrap gap-2">
             <span className="text-sm text-gray-600">Filtri attivi:</span>
+            {platform !== 'subito' && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800 font-semibold">
+                {PLATFORMS.find(p => p.value === platform)?.label}
+              </span>
+            )}
             {categoria && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
                 {CATEGORIES.find(c => c.value === categoria)?.label}

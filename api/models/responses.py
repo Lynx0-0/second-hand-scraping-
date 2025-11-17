@@ -20,6 +20,9 @@ class ListingResponse(BaseModel):
     posted_date: Optional[str] = Field(None, description="Data pubblicazione")
     seller_name: Optional[str] = Field(None, description="Nome venditore")
     seller_type: Optional[str] = Field(None, description="Tipo venditore")
+    source: str = Field(default="subito", description="Piattaforma di origine (subito/ebay)")
+    condition: Optional[str] = Field(None, description="Condizione articolo (nuovo/usato)")
+    shipping: Optional[str] = Field(None, description="Info spedizione")
     scraped_at: datetime = Field(..., description="Timestamp scraping")
 
     class Config:
@@ -49,6 +52,7 @@ class SearchResponse(BaseModel):
     search_id: str = Field(..., description="ID univoco della ricerca")
     query: str = Field(..., description="Query di ricerca")
     categoria: Optional[str] = Field(None, description="Categoria ricercata")
+    platform: str = Field(default="subito", description="Piattaforma cercata (subito/ebay/all)")
     total_results: int = Field(..., description="Numero totale di risultati")
     results: List[ListingResponse] = Field(..., description="Lista annunci trovati")
     cached: bool = Field(False, description="Se i risultati provengono da cache")
