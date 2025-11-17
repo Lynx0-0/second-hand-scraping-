@@ -22,33 +22,70 @@ Sistema modulare e robusto per il web scraping di annunci da Subito.it. Estrae t
 - **User-Agent Rotation**: Simula diversi browser
 - **Context Manager**: Gestione automatica delle risorse
 
+## 🌐 API REST
+
+Il progetto include anche un'API REST completa con FastAPI:
+
+- **FastAPI REST API**: Endpoint HTTP per ricerca e gestione annunci
+- **Caching Redis**: Performance ottimali con cache intelligente
+- **Rate Limiting**: Protezione con limiti per IP
+- **Validazione Input**: Pydantic models per validazione automatica
+- **Documentazione Interattiva**: Swagger UI e ReDoc integrati
+- **Segnalazione Annunci**: Sistema per report di annunci sospetti
+- **Docker Support**: Container ready con docker-compose
+
+**📖 [Documentazione API completa →](API_README.md)**
+
+### Quick Start API
+
+```bash
+# Avvia Redis
+docker-compose up -d redis
+
+# Avvia API
+./run_api.sh
+
+# L'API sarà disponibile su http://localhost:8000
+# Documentazione: http://localhost:8000/docs
+```
+
+### Endpoint Principali
+
+- `POST /api/v1/search` - Cerca annunci con filtri
+- `GET /api/v1/results/{id}` - Recupera risultati ricerca
+- `POST /api/v1/report-scam` - Segnala annunci sospetti
+- `GET /health` - Health check
+
 ## 📁 Struttura Progetto
 
 ```
 second-hand-scraping-/
-├── src/
-│   ├── config/
-│   │   ├── __init__.py
-│   │   └── settings.py          # Configurazioni sistema
-│   ├── models/
-│   │   ├── __init__.py
-│   │   └── listing.py           # Modello dati annuncio
-│   ├── scraper/
-│   │   ├── __init__.py
-│   │   ├── base_scraper.py      # Scraper base astratto
-│   │   └── subito_scraper.py    # Scraper specifico Subito.it
-│   └── utils/
-│       ├── __init__.py
-│       ├── rate_limiter.py      # Gestione rate limiting
-│       └── logger.py            # Configurazione logging
+├── src/                          # Core scraping library
+│   ├── config/                   # Configurazioni
+│   ├── models/                   # Modelli dati
+│   ├── scraper/                  # Scraper implementations
+│   └── utils/                    # Utility functions
+├── api/                          # REST API (FastAPI)
+│   ├── core/                     # Config e dipendenze
+│   ├── models/                   # Pydantic models
+│   ├── routers/                  # Endpoint definitions
+│   ├── services/                 # Business logic
+│   ├── middleware/               # Rate limiting, etc.
+│   └── main.py                   # FastAPI app
 ├── examples/
-│   ├── basic_scraping.py        # Esempio base
-│   └── advanced_scraping.py     # Esempi avanzati
+│   ├── basic_scraping.py         # Esempio scraper
+│   ├── advanced_scraping.py      # Esempi avanzati
+│   └── api_client.py             # Esempio client API
 ├── tests/
+├── data/                         # Database segnalazioni
 ├── output/                       # Output generato
 ├── requirements.txt
-├── .gitignore
-└── README.md
+├── docker-compose.yml            # Redis container
+├── Dockerfile                    # API container
+├── run_api.sh                    # Script avvio API
+├── .env.example                  # Configurazione esempio
+├── README.md                     # Questo file
+└── API_README.md                 # Documentazione API
 ```
 
 ## 🛠️ Installazione
