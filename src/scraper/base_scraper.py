@@ -49,6 +49,10 @@ class BaseScraper(ABC):
         """Crea una sessione requests con headers appropriati."""
         session = requests.Session()
         session.headers.update(self.config.default_headers)
+
+        # Abilita gestione automatica dei cookies
+        session.cookies.set_policy(None)  # Accetta tutti i cookies
+
         return session
 
     def _get_random_user_agent(self) -> str:
@@ -102,6 +106,34 @@ class BaseScraper(ABC):
                 logger.debug(f"Richiesta riuscita: {url} (status: {response.status_code})")
 
                 return response
+
+            except requests.exceptions.HTTPError as e:
+                last_exception = e
+                status_code = e.response.status_code if e.response else None
+
+                # Gestione speciale per codici di blocco
+                if status_code in [403, 429, 503]:
+                    logger.warning(
+                        f"Rilevato possibile blocco (HTTP {status_code}) per {url}. "
+                        f"Attesa più lunga prima del retry..."
+                    )
+                    # Attesa più lunga per blocchi (30-60 secondi)
+                    wait_time = random.uniform(30.0, 60.0)
+                else:
+                    # Exponential backoff normale
+                    wait_time = self.config.retry_delay * (self.config.backoff_factor ** retries)
+
+                retries += 1
+
+                if retries <= self.config.max_retries:
+                    logger.warning(
+                        f"Errore richiesta {url}: HTTP {status_code}. "
+                        f"Retry {retries}/{self.config.max_retries} tra {wait_time:.1f}s"
+                    )
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"Richiesta fallita dopo {self.config.max_retries} retry: {url}")
+                    logger.error(f"Errore: HTTP {status_code} - {str(e)}")
 
             except requests.exceptions.RequestException as e:
                 last_exception = e
