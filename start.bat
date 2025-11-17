@@ -5,6 +5,9 @@ echo Avvio Sistema Subito Scraper
 echo ========================================
 echo.
 
+REM Salva directory corrente
+set "PROJECT_DIR=%CD%"
+
 REM Verifica Python
 where python >nul 2>&1
 if errorlevel 1 (
@@ -23,19 +26,24 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [1/6] Verifiche completate
+echo [1/7] Verifiche completate
 echo.
 
 REM Crea virtual environment se non esiste
 if not exist venv (
-    echo [2/6] Creo virtual environment...
+    echo [2/7] Creo virtual environment...
     python -m venv venv
+    if errorlevel 1 (
+        echo ERRORE: Impossibile creare virtual environment!
+        pause
+        exit /b 1
+    )
 ) else (
-    echo [2/6] Virtual environment trovato
+    echo [2/7] Virtual environment trovato
 )
 
 REM Attiva virtual environment e installa dipendenze Python
-echo [3/6] Installo dipendenze Python...
+echo [3/7] Installo dipendenze Python...
 call venv\Scripts\activate.bat
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
@@ -44,17 +52,19 @@ if errorlevel 1 (
     echo ERRORE: Installazione dipendenze Python fallita!
     echo.
     echo SOLUZIONI:
-    echo 1. Elimina la cartella venv e riprova
+    echo 1. Elimina la cartella venv: rmdir /s /q venv
     echo 2. Se hai Python 3.13, installa Python 3.11 o 3.12
+    echo 3. Controlla logs\backend.log per dettagli
     echo.
     pause
     exit /b 1
 )
 
 REM Installa dipendenze frontend
-echo [4/6] Installo dipendenze frontend...
+echo [4/7] Installo dipendenze frontend...
 cd frontend
 if not exist node_modules (
+    echo    Installazione npm in corso (puo richiedere tempo)...
     call npm install
     if errorlevel 1 (
         echo ERRORE: Installazione npm fallita!
@@ -62,33 +72,54 @@ if not exist node_modules (
         pause
         exit /b 1
     )
+) else (
+    echo    Dipendenze frontend gia installate
 )
 cd ..
 
-REM Crea directory logs
+REM Crea directory logs e data
+echo [5/7] Preparo directory...
 if not exist logs mkdir logs
+if not exist data mkdir data
+if not exist output mkdir output
+
+REM Verifica file .env
+if not exist .env (
+    echo ATTENZIONE: File .env non trovato!
+    echo Copio da .env.example...
+    copy .env.example .env >nul
+)
+
+if not exist frontend\.env (
+    echo ATTENZIONE: File frontend\.env non trovato!
+    echo Copio da frontend\.env.example...
+    copy frontend\.env.example frontend\.env >nul
+)
 
 REM Avvia backend
-echo [5/6] Avvio Backend (porta 8000)...
-start "Backend-API" /MIN cmd /c "call venv\Scripts\activate.bat && python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 > logs\backend.log 2>&1"
+echo [6/7] Avvio Backend API (porta 8000)...
+start "Backend-API" cmd /c "cd /d "%PROJECT_DIR%" && call venv\Scripts\activate.bat && python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 2>&1 | tee logs\backend.log"
 
-REM Aspetta 3 secondi
-timeout /t 3 /nobreak >nul
+REM Aspetta backend
+echo    Attendo avvio backend...
+timeout /t 5 /nobreak >nul
+
+REM Verifica backend
+curl -s http://localhost:8000/health >nul 2>&1
+if errorlevel 1 (
+    echo    ATTENZIONE: Backend potrebbe non essere partito
+    echo    Controlla logs\backend.log
+) else (
+    echo    Backend ATTIVO!
+)
 
 REM Avvia frontend
-echo [6/6] Avvio Frontend (porta 5173)...
-cd frontend
-start "Frontend-UI" /MIN cmd /c "npm run dev > ..\logs\frontend.log 2>&1"
-cd ..
+echo [7/7] Avvio Frontend UI (porta 5173)...
+start "Frontend-UI" cmd /c "cd /d "%PROJECT_DIR%\frontend" && npm run dev 2>&1 | tee ..\logs\frontend.log"
 
-REM Aspetta che i servizi si avviino
-echo.
-echo Attendo avvio servizi...
+REM Aspetta frontend
+echo    Attendo avvio frontend...
 timeout /t 8 /nobreak >nul
-
-REM Apri browser
-echo Apro browser...
-start http://localhost:5173
 
 echo.
 echo ========================================
@@ -103,6 +134,21 @@ echo Logs:
 echo   - logs\backend.log
 echo   - logs\frontend.log
 echo.
-echo Per fermare: esegui stop.bat
+echo FINESTRE APERTE:
+echo   - Backend-API  (porta 8000)
+echo   - Frontend-UI  (porta 5173)
 echo.
-pause
+echo Per fermare: esegui stop.bat
+echo            o chiudi le finestre Backend-API e Frontend-UI
+echo.
+
+REM Apri browser
+echo Apro browser tra 3 secondi...
+timeout /t 3 /nobreak >nul
+start http://localhost:5173
+
+echo.
+echo Premi un tasto per chiudere questa finestra
+echo (Il sistema continuera a funzionare)
+echo.
+pause >nul
