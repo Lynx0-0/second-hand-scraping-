@@ -1,6 +1,35 @@
-# Sistema di Web Scraping Modulare per Subito.it
+# 🔍 Subito Scraper - Sistema Completo con Interfaccia Grafica
 
-Sistema modulare e robusto per il web scraping di annunci da Subito.it. Estrae titolo, prezzo, foto, descrizione e link degli annunci con gestione intelligente del rate limiting e retry logic.
+**Sistema di web scraping per Subito.it con interfaccia grafica React e rilevamento truffe automatico.**
+
+Cerca annunci di prodotti usati, visualizzali in una griglia ordinata con foto e prezzi, e ricevi avvisi automatici su possibili truffe tramite badge colorati intelligenti.
+
+---
+
+## ⚡ QUICK START - Avvio Interfaccia Grafica
+
+```bash
+# 1 comando per avviare tutto
+./start.sh
+```
+
+**Dopo 10 secondi, apri il browser:** **http://localhost:5173**
+
+**🎯 Cosa vedrai:**
+- Barra di ricerca con filtri (categoria, prezzo, regione)
+- Griglia responsive di annunci con foto anteprime
+- Badge rossi "ATTENZIONE TRUFFA" su annunci sospetti
+- Modal informativo con dettagli sicurezza
+- Link diretti a Subito.it
+
+**📖 Guida dettagliata:** [QUICK_START.md](QUICK_START.md)
+**📸 Anteprima interfaccia:** [INTERFACE_PREVIEW.md](INTERFACE_PREVIEW.md)
+
+---
+
+## 📋 Descrizione Sistema
+
+Sistema modulare e robusto per il web scraping di annunci da Subito.it con interfaccia grafica completa. Estrae titolo, prezzo, foto, descrizione e link degli annunci con gestione intelligente del rate limiting e rilevamento truffe automatico.
 
 ## 🚀 Caratteristiche
 
