@@ -16,7 +16,7 @@ start.bat
 
 Poi apri il browser su: **http://localhost:5173**
 
-**📖 [Guida completa Windows →](WINDOWS_SETUP.md)**
+**📖 [Guida completa Windows →](WINDOWS_SETUP.md)** | **[Quick Start Windows →](QUICK_START_WINDOWS.md)**
 
 ### 🐧 Linux / 🍎 macOS
 
@@ -25,6 +25,8 @@ Poi apri il browser su: **http://localhost:5173**
 ```
 
 Poi apri il browser su: **http://localhost:5173**
+
+**📖 [Guida dettagliata →](QUICK_START.md)** | **[Anteprima interfaccia →](INTERFACE_PREVIEW.md)**
 
 ---
 
