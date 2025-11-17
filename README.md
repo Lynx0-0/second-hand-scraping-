@@ -1,6 +1,67 @@
-# Sistema di Web Scraping Modulare per Subito.it
+# 🔍 Subito Scraper - Sistema Completo con Interfaccia Grafica
 
-Sistema modulare e robusto per il web scraping di annunci da Subito.it. Estrae titolo, prezzo, foto, descrizione e link degli annunci con gestione intelligente del rate limiting e retry logic.
+**Sistema di web scraping per Subito.it con interfaccia grafica React e rilevamento truffe automatico.**
+
+Cerca annunci di prodotti usati, visualizzali in una griglia ordinata con foto e prezzi, e ricevi avvisi automatici su possibili truffe tramite badge colorati intelligenti.
+
+---
+
+## ⚡ QUICK START
+
+### 🪟 Windows 10/11
+
+```cmd
+start.bat
+```
+
+Poi apri il browser su: **http://localhost:5173**
+
+**📖 [Guida completa Windows →](WINDOWS_SETUP.md)**
+
+### 🐧 Linux / 🍎 macOS
+
+```bash
+./start.sh
+```
+
+Poi apri il browser su: **http://localhost:5173**
+
+---
+
+## 🎯 Cosa Vedrai
+
+Dopo l'avvio, vedrai un'interfaccia web moderna con:
+
+- **Barra di ricerca** con filtri (categoria, prezzo max, regione)
+- **Griglia responsive** di annunci con foto anteprime
+- **Badge rossi "ATTENZIONE TRUFFA"** su annunci sospetti (rilevamento automatico)
+- **Modal informativo** con dettagli sicurezza quando clicchi il badge
+- **Link diretti** a Subito.it per ogni annuncio
+
+### Esempio Visivo
+
+```
+╔════════════════════════════════════════════════════╗
+║  🔍 Cerca: [iPhone 13_________] [🔍] [⚙️ Filtri]   ║
+╠════════════════════════════════════════════════════╣
+║  15 risultati trovati                              ║
+║                                                    ║
+║  ┌──────────┐  ┌──────────┐  ┌──────────┐         ║
+║  │ [📷Foto] │  │ [📷Foto] │  │ [📷Foto] │         ║
+║  │ 🔴TRUFFA │  │          │  │ 🟡SOSP   │         ║
+║  │ iPhone13 │  │ iPhone13 │  │ iPhone13 │         ║
+║  │ €150 ❌  │  │ €450 ✓   │  │ €380     │         ║
+║  │ Roma     │  │ Milano   │  │ Napoli   │         ║
+║  │ [Vedi]   │  │ [Vedi]   │  │ [Vedi]   │         ║
+║  └──────────┘  └──────────┘  └──────────┘         ║
+╚════════════════════════════════════════════════════╝
+```
+
+---
+
+## 📋 Descrizione Sistema
+
+Sistema modulare e robusto per il web scraping di annunci da Subito.it con interfaccia grafica completa. Estrae titolo, prezzo, foto, descrizione e link degli annunci con gestione intelligente del rate limiting e rilevamento truffe automatico.
 
 ## 🚀 Caratteristiche
 
