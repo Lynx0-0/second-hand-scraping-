@@ -6,24 +6,58 @@ Cerca annunci di prodotti usati, visualizzali in una griglia ordinata con foto e
 
 ---
 
-## ⚡ QUICK START - Avvio Interfaccia Grafica
+## ⚡ QUICK START
+
+### 🪟 Windows 10/11
+
+```cmd
+start.bat
+```
+
+Poi apri il browser su: **http://localhost:5173**
+
+**📖 [Guida completa Windows →](WINDOWS_SETUP.md)** | **[Quick Start Windows →](QUICK_START_WINDOWS.md)**
+
+### 🐧 Linux / 🍎 macOS
 
 ```bash
-# 1 comando per avviare tutto
 ./start.sh
 ```
 
-**Dopo 10 secondi, apri il browser:** **http://localhost:5173**
+Poi apri il browser su: **http://localhost:5173**
 
-**🎯 Cosa vedrai:**
-- Barra di ricerca con filtri (categoria, prezzo, regione)
-- Griglia responsive di annunci con foto anteprime
-- Badge rossi "ATTENZIONE TRUFFA" su annunci sospetti
-- Modal informativo con dettagli sicurezza
-- Link diretti a Subito.it
+**📖 [Guida dettagliata →](QUICK_START.md)** | **[Anteprima interfaccia →](INTERFACE_PREVIEW.md)**
 
-**📖 Guida dettagliata:** [QUICK_START.md](QUICK_START.md)
-**📸 Anteprima interfaccia:** [INTERFACE_PREVIEW.md](INTERFACE_PREVIEW.md)
+---
+
+## 🎯 Cosa Vedrai
+
+Dopo l'avvio, vedrai un'interfaccia web moderna con:
+
+- **Barra di ricerca** con filtri (categoria, prezzo max, regione)
+- **Griglia responsive** di annunci con foto anteprime
+- **Badge rossi "ATTENZIONE TRUFFA"** su annunci sospetti (rilevamento automatico)
+- **Modal informativo** con dettagli sicurezza quando clicchi il badge
+- **Link diretti** a Subito.it per ogni annuncio
+
+### Esempio Visivo
+
+```
+╔════════════════════════════════════════════════════╗
+║  🔍 Cerca: [iPhone 13_________] [🔍] [⚙️ Filtri]   ║
+╠════════════════════════════════════════════════════╣
+║  15 risultati trovati                              ║
+║                                                    ║
+║  ┌──────────┐  ┌──────────┐  ┌──────────┐         ║
+║  │ [📷Foto] │  │ [📷Foto] │  │ [📷Foto] │         ║
+║  │ 🔴TRUFFA │  │          │  │ 🟡SOSP   │         ║
+║  │ iPhone13 │  │ iPhone13 │  │ iPhone13 │         ║
+║  │ €150 ❌  │  │ €450 ✓   │  │ €380     │         ║
+║  │ Roma     │  │ Milano   │  │ Napoli   │         ║
+║  │ [Vedi]   │  │ [Vedi]   │  │ [Vedi]   │         ║
+║  └──────────┘  └──────────┘  └──────────┘         ║
+╚════════════════════════════════════════════════════╝
+```
 
 ---
 
