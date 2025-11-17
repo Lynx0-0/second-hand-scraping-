@@ -22,6 +22,9 @@ class Listing:
     seller_name: Optional[str] = None
     seller_type: Optional[str] = None  # "privato" o "professionale"
     listing_id: Optional[str] = None
+    source: str = "subito"  # Piattaforma di origine: "subito", "ebay", ecc.
+    condition: Optional[str] = None  # Condizione articolo (nuovo/usato/ecc.)
+    shipping: Optional[str] = None  # Info spedizione (es. "Spedizione gratuita")
     scraped_at: datetime = field(default_factory=datetime.now)
     metadata: Dict = field(default_factory=dict)
 
