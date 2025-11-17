@@ -1,0 +1,10 @@
+# Web Scraping
+beautifulsoup4==4.12.3
+requests==2.31.0
+lxml==5.1.0
+
+# Utilities
+python-dateutil==2.8.2
+
+# Optional: per parser HTML più veloce
+# html5lib==1.1
