@@ -7,7 +7,8 @@ Guida rapida in 3 passi per Windows.
 ### Python 3.9+
 
 1. Vai su https://www.python.org/downloads/
-2. Scarica l'installer Windows
+2. **Scarica Python 3.11 o 3.12** (consigliato per Windows)
+   - ⚠️ Python 3.13 potrebbe avere problemi con alcuni pacchetti su Windows
 3. **IMPORTANTE:** Spunta ✅ "Add Python to PATH"
 4. Clicca "Install Now"
 
@@ -170,6 +171,29 @@ Per riavviare: start.bat
 1. Reinstalla Python
 2. Spunta "Add Python to PATH"
 3. Riavvia Prompt dei Comandi
+
+### ❌ Errore pydantic-core / Rust
+
+**Errore:**
+```
+error: metadata-generation-failed
+× Encountered error while generating package metadata.
+╰─> pydantic-core
+```
+
+**Soluzione:**
+```cmd
+REM 1. Elimina virtual environment
+rmdir /s /q venv
+
+REM 2. Riprova (ho aggiornato requirements.txt)
+start.bat
+```
+
+**Se persiste:** Usa Python 3.11 o 3.12 invece di 3.13
+- Vai su https://www.python.org/downloads/
+- Scarica Python 3.11.x o 3.12.x
+- Reinstalla e riprova
 
 ### ❌ Porta 8000 occupata
 

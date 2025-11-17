@@ -215,6 +215,52 @@ npm install -g yarn
 yarn install
 ```
 
+### ❌ Errore "pydantic-core" - Rust non trovato (Python 3.13)
+
+**Problema:** `error: metadata-generation-failed` per `pydantic-core` con Python 3.13
+
+**Causa:** Python 3.13 è molto recente e alcuni pacchetti non hanno wheel pre-compilati per Windows.
+
+**✅ Soluzione 1 - Aggiorna requirements.txt (CONSIGLIATO):**
+
+Ho già aggiornato il file `requirements.txt` con versioni compatibili. Riprova:
+
+```cmd
+# Se eri nel mezzo dell'installazione, riparti da capo
+stop.bat
+
+# Elimina virtual environment
+rmdir /s /q venv
+
+# Riavvia (userà il nuovo requirements.txt)
+start.bat
+```
+
+**Soluzione 2 - Usa Python 3.11 o 3.12:**
+
+Se il problema persiste:
+
+1. Disinstalla Python 3.13
+2. Scarica **Python 3.11** o **3.12** da https://www.python.org/downloads/
+3. Installa con "Add Python to PATH"
+4. Riavvia e prova `start.bat`
+
+**Soluzione 3 - Installa Microsoft C++ Build Tools:**
+
+Se preferisci continuare con Python 3.13:
+
+1. Scarica da: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+2. Installa "Desktop development with C++"
+3. Riavvia PC
+4. Riprova `start.bat`
+
+**Verifica versione Python:**
+```cmd
+python --version
+```
+
+Consigliato: **Python 3.11.x** o **3.12.x** per massima compatibilità Windows.
+
 ### ❌ "ModuleNotFoundError" Python
 
 **Problema:** Dipendenze Python non installate
