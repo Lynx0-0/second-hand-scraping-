@@ -1,4 +1,4 @@
-# ⚡ Quick Start per Windows 10/11
+# 🚀 Quick Start - Windows 10/11
 
 Guida rapida in 3 passi per Windows.
 
@@ -15,146 +15,125 @@ Guida rapida in 3 passi per Windows.
 ### Node.js 18+
 
 1. Vai su https://nodejs.org/
-2. Scarica versione "LTS" (Long Term Support)
-3. Esegui installer
-4. Accetta tutte le opzioni di default
+2. Scarica versione **LTS** (Long Term Support)
+3. Installa con impostazioni predefinite
+4. Riavvia Prompt dei Comandi
 
-### Verifica Installazione
-
-Apri **Prompt dei Comandi** (cerca "cmd" nel menu Start):
-
+**Verifica installazione:**
 ```cmd
 python --version
 node --version
 ```
 
-Se vedi i numeri di versione, sei pronto! ✅
-
 ---
 
-## 🚀 Passo 2: Avvia il Sistema
+## 🎯 Passo 2: Avvia il Sistema
 
-### Metodo Facile (Doppio Click)
+### Opzione A: Doppio Click (Più Semplice)
 
-1. Vai nella cartella del progetto
-2. **Doppio click su `start.bat`**
-3. Aspetta 10-15 secondi
-4. Il browser si apre automaticamente
+1. Apri la cartella del progetto
+2. **Doppio click** su `start.bat`
+3. Attendi 10-15 secondi
+4. Il browser si aprirà automaticamente
 
-### Metodo Command Line
-
-Apri **Prompt dei Comandi** nella cartella progetto:
+### Opzione B: Da Prompt dei Comandi
 
 ```cmd
+cd C:\percorso\del\progetto\second-hand-scraping-
 start.bat
 ```
 
-**Cosa Succede:**
-```
-========================================
-🚀 Avvio Sistema Completo - Windows 10
-========================================
+### Cosa fa start.bat?
 
-1️⃣  Verifico Python...
-✓ Python installato: Python 3.11.0
+Lo script automaticamente:
+- ✅ Verifica Python e Node.js
+- ✅ Crea virtual environment Python
+- ✅ Installa dipendenze Python
+- ✅ Installa dipendenze frontend (npm)
+- ✅ Avvia Backend (porta 8000)
+- ✅ Avvia Frontend (porta 5173)
+- ✅ Apre browser su http://localhost:5173
 
-2️⃣  Verifico Node.js...
-✓ Node.js installato: v18.17.0
-
-3️⃣  Setup Python virtual environment...
-✓ Virtual environment attivato
-
-4️⃣  Installo dipendenze Python...
-✓ Dipendenze Python installate
-
-5️⃣  Installo dipendenze Frontend...
-✓ Dipendenze Frontend installate
-
-8️⃣  Verifico configurazione...
-✓ Configurazione verificata
-
-9️⃣  Avvio Backend API...
-✓ Backend avviato correttamente!
-
-🔟  Avvio Frontend React...
-
-========================================
-✅ Sistema Avviato con Successo!
-========================================
-
-📍 LINK UTILI:
-   • Frontend:     http://localhost:5173
-   • Backend API:  http://localhost:8000
-
-🛑 PER FERMARE:
-   stop.bat
-
-ℹ Apro il browser...
-```
+**Tempi stimati:**
+- Prima esecuzione: 2-5 minuti (installa tutto)
+- Successive: 10-15 secondi (già installato)
 
 ---
 
-## 💻 Passo 3: Usa l'Interfaccia
+## 🎨 Passo 3: Usa l'Interfaccia
 
-Il browser si apre automaticamente su **http://localhost:5173**
+Dopo l'avvio vedrai:
 
-### Prima Ricerca:
+### 1. Barra di Ricerca
+- Cerca prodotti (es: "iPhone 13")
+- Usa filtri: categoria, prezzo max, regione
 
-1. **Scrivi nella barra:** `iPhone 13`
-2. **Clicca:** 🔍 Cerca
-3. **Aspetta 2-5 secondi**
-4. **Vedi la griglia** con risultati e foto
+### 2. Risultati
+- Griglia con foto anteprime
+- Prezzi e località
+- Badge colorati:
+  - 🔴 **Rosso** = Rischio truffa alto (score > 70%)
+  - 🟡 **Giallo** = Rischio medio (40-70%)
+  - 🟢 **Verde** = Rischio basso (< 40%)
 
-### Con Filtri:
+### 3. Dettagli Truffe
+- Click su badge rosso/giallo
+- Vedi motivi sospetti
+- Leggi consigli sicurezza
+- Segnala annuncio
 
-1. **Clicca:** ⚙️ (icona filtri)
-2. **Seleziona:**
-   - Categoria: Telefonia
-   - Prezzo max: 500
-   - Regione: Lazio
-3. **Clicca:** 🔍 Cerca
-4. **Vedi risultati filtrati**
-
-### Badge Truffe:
-
-Se vedi **🔴 ATTENZIONE TRUFFA (85)** su un annuncio:
-
-1. **Clicca il badge rosso**
-2. Si apre **modal** con:
-   - Score di rischio (es. 85/100)
-   - Motivi specifici (prezzo basso, poche foto, etc.)
-   - 5 consigli di sicurezza
-   - Form per segnalare
-3. **Leggi i consigli** prima di contattare il venditore!
+### 4. Link Diretti
+- Click "Vedi su Subito"
+- Apre annuncio originale
 
 ---
 
 ## 🛑 Fermare il Sistema
 
-### Metodo 1: Doppio Click
-
-**Doppio click su `stop.bat`**
-
-### Metodo 2: Command Line
-
+### Opzione A: Script Stop
 ```cmd
 stop.bat
 ```
 
-Output:
+### Opzione B: Manuale
+Chiudi le finestre:
+- `Backend-FastAPI`
+- `Frontend-React-Vite`
+
+---
+
+## 🔄 Reset Sistema (In caso di problemi)
+
+Se hai errori di installazione o dipendenze corrotte:
+
+```cmd
+reset.bat
 ```
-🛑 Fermando il sistema...
 
-Fermando Backend API...
-✓ Backend fermato
+Questo script:
+- 🛑 Arresta tutti i servizi
+- 🗑️ Rimuove virtual environment
+- 🧹 Pulisce cache Python
+- 🔄 Opzionalmente rimuove node_modules
+- ✨ Resetta sistema a stato iniziale
 
-Fermando Frontend React...
-✓ Frontend fermato
-
-✓ Sistema fermato
-
-Per riavviare: start.bat
+Dopo il reset:
+```cmd
+start.bat
 ```
+
+---
+
+## 📡 URL Utili
+
+Dopo l'avvio:
+
+| Servizio | URL | Descrizione |
+|----------|-----|-------------|
+| **Frontend** | http://localhost:5173 | Interfaccia utente |
+| **Backend** | http://localhost:8000 | API REST |
+| **API Docs** | http://localhost:8000/docs | Swagger UI |
+| **ReDoc** | http://localhost:8000/redoc | Documentazione API |
 
 ---
 
@@ -183,10 +162,10 @@ error: metadata-generation-failed
 
 **Soluzione:**
 ```cmd
-REM 1. Elimina virtual environment
-rmdir /s /q venv
+REM 1. Usa lo script di reset
+reset.bat
 
-REM 2. Riprova (ho aggiornato requirements.txt)
+REM 2. Riavvia
 start.bat
 ```
 
@@ -232,108 +211,110 @@ npm install
 cd ..
 ```
 
-### ❌ Browser non si apre
+### ❌ Browser non si apre automaticamente
 
 **Soluzione:**
-Apri manualmente: http://localhost:5173
 
-### ❌ "Access is denied"
+Apri manualmente: **http://localhost:5173**
+
+Se non vedi l'interfaccia:
+1. Attendi 15 secondi
+2. Aggiorna (F5)
+3. Controlla logs:
+   - `logs\backend.log`
+   - `logs\frontend.log`
+
+### ❌ Pagina bianca / Errori JavaScript
 
 **Soluzione:**
-Esegui come Amministratore:
-1. Click destro su `start.bat`
-2. "Esegui come amministratore"
-
----
-
-## 📂 Cosa Crea lo Script
-
-Dopo il primo avvio, troverai:
-
-```
-second-hand-scraping-\
-├── venv\                ← Virtual environment Python
-├── frontend\
-│   └── node_modules\    ← Dipendenze Node.js (2-300 MB)
-├── logs\
-│   ├── backend.log      ← Log API
-│   └── frontend.log     ← Log React
-├── data\                ← Database segnalazioni
-└── output\              ← Risultati export
-```
-
----
-
-## ⏱️ Tempi di Esecuzione
-
-| Operazione | Prima Volta | Successivi |
-|------------|-------------|------------|
-| Installazione dipendenze | 3-5 minuti | - |
-| Avvio sistema | 15 secondi | 10 secondi |
-| Prima ricerca | 2-5 secondi | - |
-| Ricerche successive | 1-2 secondi | (con cache) |
-
----
-
-## 💡 Tips Windows
-
-### Collegamento Desktop
-
-Per avviare con doppio click dal desktop:
-
-1. Click destro su `start.bat`
-2. "Invia a" → "Desktop (crea collegamento)"
-3. Rinomina "🔍 Avvia Subito Scraper"
-
-### Apri Prompt Comandi Veloce
-
-Nella cartella progetto:
-1. **Shift + Click destro** su spazio vuoto
-2. "Apri finestra PowerShell qui"
-3. Digita `start.bat`
-
-### Verifica Log
-
-Se qualcosa non funziona:
-
 ```cmd
-REM Vedi log backend
-type logs\backend.log
+REM 1. Ferma sistema
+stop.bat
 
-REM Vedi log frontend
-type logs\frontend.log
-```
+REM 2. Pulisci frontend
+cd frontend
+rd /s /q node_modules
+npm cache clean --force
+cd ..
 
----
-
-## ✅ Checklist Prima Volta
-
-- [ ] Python installato (con "Add to PATH")
-- [ ] Node.js installato
-- [ ] Internet connesso
-- [ ] Almeno 2GB spazio disco
-- [ ] Windows Defender non blocca Python/Node
-- [ ] Doppio click su `start.bat`
-- [ ] Aspetto messaggio "Sistema Avviato"
-- [ ] Browser aperto su localhost:5173
-- [ ] Prima ricerca funzionante
-
----
-
-## 🎉 Pronto!
-
-**Ora hai:**
-- ✅ Interfaccia grafica funzionante
-- ✅ Ricerca annunci con foto
-- ✅ Rilevamento truffe automatico
-- ✅ Badge colorati per sicurezza
-- ✅ Link diretti a Subito.it
-
-**Comando completo:**
-```cmd
+REM 3. Riavvia
 start.bat
 ```
 
-**Poi cerca:** "iPhone 13", "MacBook", "Bicicletta"
+### ❌ "ModuleNotFoundError" Python
 
-**📖 [Guida completa Windows →](WINDOWS_SETUP.md)**
+**Soluzione:**
+```cmd
+REM 1. Ferma sistema
+stop.bat
+
+REM 2. Rimuovi venv
+rd /s /q venv
+
+REM 3. Riavvia (reinstalla tutto)
+start.bat
+```
+
+---
+
+## 🛠️ Script Disponibili
+
+| Script | Descrizione | Quando usarlo |
+|--------|-------------|---------------|
+| **start.bat** | Avvia sistema completo | Uso quotidiano |
+| **stop.bat** | Ferma tutti i servizi | Quando finisci di lavorare |
+| **reset.bat** | Reset completo sistema | Problemi di installazione |
+
+---
+
+## 📖 Documentazione Completa
+
+Per problemi più complessi o configurazioni avanzate:
+
+- **[WINDOWS_SETUP.md](WINDOWS_SETUP.md)** - Setup dettagliato Windows
+- **[README.md](README.md)** - Documentazione generale
+- **[INTERFACE_PREVIEW.md](INTERFACE_PREVIEW.md)** - Anteprima interfaccia
+
+---
+
+## 💡 Tips
+
+1. **Prima esecuzione lenta?**
+   - È normale, installa tutte le dipendenze
+   - Esecuzioni successive saranno veloci
+
+2. **Errori strani?**
+   - Prova `reset.bat` per ricominciare da capo
+
+3. **Python 3.13 problemi?**
+   - Usa Python 3.11 o 3.12 per massima compatibilità
+
+4. **Redis non necessario**
+   - Il sistema funziona anche senza Redis
+   - Cache disabilitata automaticamente se Redis non disponibile
+
+5. **Logs utili**
+   - Backend: `logs\backend.log`
+   - Frontend: `logs\frontend.log`
+   - Controlla in caso di errori
+
+---
+
+## 🎯 Checklist Prima Esecuzione
+
+- [ ] Python 3.11/3.12 installato con "Add to PATH"
+- [ ] Node.js 18+ LTS installato
+- [ ] Terminali/Prompt chiusi e riaperti
+- [ ] `python --version` funziona
+- [ ] `node --version` funziona
+- [ ] Antivirus non blocca Python/Node
+- [ ] Sei nella directory del progetto
+- [ ] Doppio click su `start.bat`
+- [ ] Attendi 2-5 minuti (prima volta)
+- [ ] Browser aperto su http://localhost:5173
+
+---
+
+**🚀 Pronto! Buon utilizzo!**
+
+Per supporto: consulta [WINDOWS_SETUP.md](WINDOWS_SETUP.md) per troubleshooting dettagliato.
