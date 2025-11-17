@@ -1,203 +1,154 @@
 @echo off
-REM Script per avviare l'intero sistema su Windows 10
-
+chcp 65001 >nul
 setlocal EnableDelayedExpansion
 
+echo.
 echo ========================================
-echo 🚀 Avvio Sistema Completo - Windows 10
+echo    AVVIO SISTEMA - WINDOWS
 echo ========================================
 echo.
 
-REM Directory root del progetto
-set "PROJECT_ROOT=%~dp0"
-cd /d "%PROJECT_ROOT%"
+cd /d "%~dp0"
 
 REM 1. Verifica Python
-echo 1️⃣  Verifico Python...
+echo [1] Verifica Python...
 where python >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ✗ Python non trovato. Scaricalo da https://www.python.org/downloads/
-    echo   IMPORTANTE: Spunta "Add Python to PATH" durante l'installazione
+    echo ERRORE: Python non trovato
+    echo Scarica da: https://www.python.org/downloads/
     pause
     exit /b 1
 )
-for /f "tokens=*" %%i in ('python --version') do set PYTHON_VERSION=%%i
-echo ✓ Python installato: %PYTHON_VERSION%
+python --version
+echo OK Python trovato
+echo.
 
 REM 2. Verifica Node.js
-echo.
-echo 2️⃣  Verifico Node.js...
+echo [2] Verifica Node.js...
 where node >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ✗ Node.js non trovato. Scaricalo da https://nodejs.org/
+    echo ERRORE: Node.js non trovato
+    echo Scarica da: https://nodejs.org/
     pause
     exit /b 1
 )
-for /f "tokens=*" %%i in ('node --version') do set NODE_VERSION=%%i
-echo ✓ Node.js installato: %NODE_VERSION%
-
-REM 3. Crea e attiva virtual environment Python
+node --version
+echo OK Node.js trovato
 echo.
-echo 3️⃣  Setup Python virtual environment...
-if not exist "venv" (
-    echo ℹ Creo virtual environment...
+
+REM 3. Crea directory
+echo [3] Creazione directory...
+if not exist logs mkdir logs
+if not exist data mkdir data
+if not exist output mkdir output
+echo OK Directory create
+echo.
+
+REM 4. Virtual environment Python
+echo [4] Setup virtual environment...
+if not exist venv (
+    echo Creazione virtual environment...
     python -m venv venv
 )
-
 call venv\Scripts\activate.bat
-echo ✓ Virtual environment attivato
-
-REM 4. Installa dipendenze Python
+echo OK Virtual environment attivo
 echo.
-echo 4️⃣  Installo dipendenze Python...
+
+REM 5. Dipendenze Python
+echo [5] Installazione dipendenze Python...
+pip install -q --upgrade pip
 pip install -q -r requirements.txt
 if %errorlevel% neq 0 (
-    echo ✗ Errore installazione dipendenze Python
+    echo ERRORE installazione dipendenze Python
     pause
     exit /b 1
 )
-echo ✓ Dipendenze Python installate
-
-REM 5. Installa dipendenze Frontend
+echo OK Dipendenze Python installate
 echo.
-echo 5️⃣  Installo dipendenze Frontend...
-cd frontend
 
-if not exist "node_modules" (
-    echo ℹ Installo dipendenze Node.js (potrebbe richiedere qualche minuto)...
+REM 6. Dipendenze Frontend
+echo [6] Installazione dipendenze Frontend...
+cd frontend
+if not exist node_modules (
+    echo Installazione npm - attendere 2-3 minuti...
     call npm install
     if !errorlevel! neq 0 (
-        echo ✗ Errore installazione dipendenze Frontend
+        echo ERRORE installazione dipendenze Frontend
         cd ..
         pause
         exit /b 1
     )
-    echo ✓ Dipendenze Frontend installate
-) else (
-    echo ✓ Dipendenze Frontend già installate
 )
-
+echo OK Dipendenze Frontend installate
 cd ..
-
-REM 6. Verifica Redis (opzionale)
 echo.
-echo 6️⃣  Verifico Redis...
-where redis-cli >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ℹ Redis non trovato. L'API funzionerà senza cache.
-    echo   Per installare Redis su Windows: https://github.com/microsoftarchive/redis/releases
-) else (
-    redis-cli ping >nul 2>&1
-    if !errorlevel! equ 0 (
-        echo ✓ Redis già in esecuzione
-    ) else (
-        echo ℹ Redis installato ma non in esecuzione
-        echo   Avvia Redis manualmente se vuoi usare la cache
-    )
-)
 
-REM 7. Crea directory necessarie
+REM 7. Avvio Backend
+echo [7] Avvio Backend API...
+echo Backend: http://localhost:8000
+start "Subito Scraper - Backend" /MIN cmd /k "venv\Scripts\python.exe -m uvicorn api.main:app --host 0.0.0.0 --port 8000"
+echo OK Backend avviato in finestra separata
 echo.
-echo 7️⃣  Creo directory necessarie...
-if not exist "data" mkdir data
-if not exist "output" mkdir output
-if not exist "logs" mkdir logs
-echo ✓ Directory create
 
-REM 8. Configura variabili d'ambiente
-echo.
-echo 8️⃣  Verifico configurazione...
-if not exist ".env" (
-    echo ℹ Copio .env.example in .env
-    copy .env.example .env >nul
-)
-echo ✓ Configurazione verificata
-
-REM 9. Avvia Backend API
-echo.
-echo 9️⃣  Avvio Backend API...
-echo.
-echo ℹ Backend sarà disponibile su: http://localhost:8000
-echo ℹ Docs interattive: http://localhost:8000/docs
-
-REM Avvia in background e salva PID
-start /B python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 > logs\backend.log 2>&1
-
-REM Attendi che il backend sia pronto
-echo ℹ Attendo che il backend sia pronto...
+REM Attesa backend
+echo Attendo backend...
 timeout /t 5 /nobreak >nul
-
-REM Verifica che il backend risponda (max 30 secondi)
-set /a counter=0
-:wait_backend
-set /a counter+=1
-if %counter% gtr 30 goto backend_timeout
-
+set /a RETRY=0
+:check_backend
 curl -s http://localhost:8000/health >nul 2>&1
-if %errorlevel% neq 0 (
-    timeout /t 1 /nobreak >nul
-    goto wait_backend
+if %errorlevel% equ 0 (
+    echo OK Backend risponde
+    goto backend_ok
 )
-
-echo ✓ Backend avviato correttamente!
-goto backend_ok
-
-:backend_timeout
-echo ⚠️ Backend non risponde dopo 30 secondi
-echo ℹ Controlla logs\backend.log per dettagli
-
+set /a RETRY+=1
+if %RETRY% lss 10 (
+    echo Tentativo %RETRY%/10...
+    timeout /t 2 /nobreak >nul
+    goto check_backend
+)
+echo ATTENZIONE: Backend non risponde
+echo Controlla finestra Backend
 :backend_ok
-
-REM 10. Avvia Frontend
 echo.
-echo 🔟  Avvio Frontend React...
-echo.
-echo ℹ Frontend sarà disponibile su: http://localhost:5173
 
+REM 8. Avvio Frontend
+echo [8] Avvio Frontend React...
+echo Frontend: http://localhost:5173
 cd frontend
-
-REM Avvia in background
-start /B cmd /c "npm run dev > ..\logs\frontend.log 2>&1"
-
+start "Subito Scraper - Frontend" cmd /k "npm run dev"
 cd ..
+echo OK Frontend avviato in finestra separata
+echo.
 
-REM Attendi che il frontend sia pronto
-echo ℹ Attendo che il frontend sia pronto...
+REM Attesa frontend
+echo Attendo frontend...
 timeout /t 8 /nobreak >nul
+echo.
 
-REM 11. Riepilogo
-echo.
+REM 9. Riepilogo
 echo ========================================
-echo ✅ Sistema Avviato con Successo!
+echo    SISTEMA AVVIATO!
 echo ========================================
 echo.
-echo 📍 LINK UTILI:
-echo    • Frontend:     http://localhost:5173
-echo    • Backend API:  http://localhost:8000
-echo    • API Docs:     http://localhost:8000/docs
+echo Frontend:  http://localhost:5173
+echo Backend:   http://localhost:8000
+echo Docs API:  http://localhost:8000/docs
 echo.
-echo 📁 LOG FILES:
-echo    • Backend:  logs\backend.log
-echo    • Frontend: logs\frontend.log
-echo.
-echo 🛑 PER FERMARE:
-echo    stop.bat
-echo.
-echo 💡 SUGGERIMENTI:
-echo    1. Apri http://localhost:5173 nel browser
-echo    2. Prova a cercare: "iPhone 13", "MacBook", "Bicicletta"
-echo    3. Usa i filtri per raffinare la ricerca
-echo    4. Clicca sul badge rosso per info sulle truffe
+echo IMPORTANTE:
+echo - Vedrai 2 finestre cmd separate
+echo - NON chiuderle! Backend e Frontend sono li
+echo - Per fermare: stop.bat oppure chiudi le finestre
 echo.
 echo ========================================
 echo.
 
-REM Apri automaticamente il browser
-echo ℹ Apro il browser...
-timeout /t 2 /nobreak >nul
+REM Apri browser
+echo Apertura browser...
+timeout /t 3 /nobreak >nul
 start http://localhost:5173
 
 echo.
-echo ✓ Sistema avviato! Premi un tasto per chiudere questa finestra.
-echo   (Il sistema continuerà a funzionare in background)
+echo Sistema avviato!
+echo Premi un tasto per chiudere SOLO questa finestra.
+echo Le altre 2 finestre devono rimanere aperte!
 pause >nul

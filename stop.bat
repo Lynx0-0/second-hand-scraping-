@@ -1,45 +1,43 @@
 @echo off
-REM Script per fermare l'intero sistema su Windows 10
+chcp 65001 >nul
 
-echo 🛑 Fermando il sistema...
+echo.
+echo ========================================
+echo    ARRESTO SISTEMA
+echo ========================================
 echo.
 
-REM Ferma tutti i processi uvicorn (Backend)
-echo Fermando Backend API...
-taskkill /F /IM python.exe /FI "WINDOWTITLE eq *uvicorn*" >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✓ Backend fermato
-) else (
-    echo ℹ Backend non in esecuzione
-)
+cd /d "%~dp0"
 
-REM Ferma processi Node/Vite (Frontend)
-echo Fermando Frontend React...
-taskkill /F /IM node.exe /FI "WINDOWTITLE eq *vite*" >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✓ Frontend fermato
-) else (
-    echo ℹ Frontend non in esecuzione
-)
-
-REM Alternativa: cerca per porta
+REM Ferma Python
+echo Fermando Backend...
+taskkill /F /IM python.exe >nul 2>&1
+if exist logs\backend.pid del /Q logs\backend.pid
+echo OK Backend fermato
 echo.
-echo Verifico porte...
 
-REM Libera porta 8000 (Backend)
+REM Ferma Node.js
+echo Fermando Frontend...
+taskkill /F /IM node.exe >nul 2>&1
+if exist logs\frontend.pid del /Q logs\frontend.pid
+echo OK Frontend fermato
+echo.
+
+REM Pulizia processi su porte
+echo Pulizia porte...
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000 ^| findstr LISTENING') do (
-    echo Termino processo sulla porta 8000 (PID: %%a)
     taskkill /F /PID %%a >nul 2>&1
 )
-
-REM Libera porta 5173 (Frontend)
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :5173 ^| findstr LISTENING') do (
-    echo Termino processo sulla porta 5173 (PID: %%a)
     taskkill /F /PID %%a >nul 2>&1
 )
-
+echo OK Porte liberate
 echo.
-echo ✓ Sistema fermato
+
+echo ========================================
+echo    SISTEMA ARRESTATO
+echo ========================================
 echo.
 echo Per riavviare: start.bat
+echo.
 pause
