@@ -96,6 +96,9 @@ def _convert_listing_to_response(listing: Listing) -> ListingResponse:
         posted_date=listing.posted_date,
         seller_name=listing.seller_name,
         seller_type=listing.seller_type,
+        source=listing.source,
+        condition=listing.condition,
+        shipping=listing.shipping,
         scraped_at=listing.scraped_at
     )
 
@@ -104,51 +107,55 @@ def _convert_listing_to_response(listing: Listing) -> ListingResponse:
     "/search",
     response_model=SearchResponse,
     status_code=status.HTTP_200_OK,
-    summary="Cerca annunci su Subito.it",
+    summary="Cerca annunci su Subito.it, eBay o entrambe",
     description="""
-    Cerca annunci su Subito.it con filtri opzionali.
+    Cerca annunci su più piattaforme con filtri opzionali.
 
     I risultati vengono automaticamente cachati per migliorare le performance.
     Le ricerche identiche restituiscono risultati dalla cache per 1 ora.
 
     **Parametri:**
     - **query**: Parola chiave di ricerca (obbligatorio, 2-100 caratteri)
+    - **platform**: Piattaforma (subito/ebay/all) - default: subito
     - **categoria**: Categoria specifica (opzionale)
     - **prezzo_max**: Prezzo massimo in euro (opzionale)
-    - **regione**: Regione geografica (opzionale)
+    - **regione**: Regione geografica (opzionale, solo Subito.it)
     - **max_pages**: Numero di pagine da scansionare, max 5 (default: 1)
 
     **Note:**
     - Il rate limiting limita le richieste a 10 al minuto per IP
-    - Rispetta le policy di Subito.it e usa delay appropriati
+    - platform='all' cerca su Subito.it ed eBay contemporaneamente
+    - I risultati sono ordinati per piattaforma e poi per prezzo
     """
 )
 async def search_listings(
     request: SearchRequest,
-    redis_client: redis.Redis = Depends(get_redis_client),
-    scraper: SubitoScraper = Depends(get_scraper)
+    redis_client: redis.Redis = Depends(get_redis_client)
 ):
-    """Endpoint per cercare annunci."""
+    """Endpoint per cercare annunci multi-piattaforma."""
     start_time = time.time()
 
     logger.info(
-        f"Ricerca richiesta: query='{request.query}', "
+        f"Ricerca richiesta: query='{request.query}', platform={request.platform}, "
         f"categoria={request.categoria}, prezzo_max={request.prezzo_max}"
     )
 
     # Inizializza cache service
     cache = CacheService(redis_client)
 
-    # Prova a recuperare da cache
-    cached_results = cache.get_search_results(
-        query=request.query,
-        categoria=request.categoria.value if request.categoria else None,
-        prezzo_max=request.prezzo_max,
-        regione=request.regione
-    )
+    # Prova a recuperare da cache (include platform nella chiave)
+    cache_key_params = {
+        "query": request.query,
+        "categoria": request.categoria.value if request.categoria else None,
+        "prezzo_max": request.prezzo_max,
+        "regione": request.regione,
+        "platform": request.platform.value
+    }
+
+    cached_results = cache.get_search_results(**cache_key_params)
 
     if cached_results:
-        logger.info("Risultati recuperati da cache")
+        logger.info(f"Risultati recuperati da cache per platform={request.platform}")
         execution_time = (time.time() - start_time) * 1000
 
         # Marca come cached
@@ -158,31 +165,63 @@ async def search_listings(
         return SearchResponse(**cached_results)
 
     # Non in cache, esegui scraping
+    all_listings = []
+
     try:
-        logger.info("Esecuzione scraping...")
+        logger.info(f"Esecuzione scraping su platform={request.platform}...")
 
-        # Esegui ricerca
-        listings = scraper.search(
-            query=request.query,
-            category=request.categoria.value if request.categoria else None,
-            region=request.regione,
-            max_pages=request.max_pages
-        )
+        # Determina su quali piattaforme cercare
+        platforms_to_search = []
+        if request.platform == PlatformEnum.ALL:
+            platforms_to_search = [PlatformEnum.SUBITO, PlatformEnum.EBAY]
+        else:
+            platforms_to_search = [request.platform]
 
-        logger.info(f"Trovati {len(listings)} annunci")
+        # Esegui ricerca su ogni piattaforma
+        for platform in platforms_to_search:
+            logger.info(f"Scraping {platform.value}...")
+
+            scraper = _create_scraper(platform)
+
+            try:
+                if platform == PlatformEnum.SUBITO:
+                    # Subito.it - usa categoria e regione
+                    platform_listings = scraper.search(
+                        query=request.query,
+                        category=request.categoria.value if request.categoria else None,
+                        region=request.regione,
+                        max_pages=request.max_pages
+                    )
+                else:  # eBay
+                    # eBay - ignora regione (non supportata)
+                    platform_listings = scraper.search(
+                        query=request.query,
+                        max_pages=request.max_pages
+                    )
+
+                all_listings.extend(platform_listings)
+                logger.info(f"Trovati {len(platform_listings)} annunci su {platform.value}")
+
+            finally:
+                scraper.close()
+
+        logger.info(f"Totale annunci trovati: {len(all_listings)}")
 
         # Filtra per prezzo se richiesto
         if request.prezzo_max is not None:
-            original_count = len(listings)
-            listings = _filter_by_price(listings, request.prezzo_max)
+            original_count = len(all_listings)
+            all_listings = _filter_by_price(all_listings, request.prezzo_max)
             logger.info(
-                f"Filtrati per prezzo: {original_count} -> {len(listings)} annunci"
+                f"Filtrati per prezzo: {original_count} -> {len(all_listings)} annunci"
             )
+
+        # Ordina risultati: prima per piattaforma, poi per prezzo
+        all_listings.sort(key=lambda x: (x.source, x.price if x.price else float('inf')))
 
         # Converti in response model
         listing_responses = [
             _convert_listing_to_response(listing)
-            for listing in listings
+            for listing in all_listings
         ]
 
         # Genera ID univoco per la ricerca
@@ -197,20 +236,18 @@ async def search_listings(
             "results": [resp.dict() for resp in listing_responses],
             "cached": False,
             "scraped_at": datetime.now(),
-            "execution_time_ms": (time.time() - start_time) * 1000
+            "execution_time_ms": (time.time() - start_time) * 1000,
+            "platform": request.platform.value
         }
 
-        # Salva in cache
+        # Salva in cache con platform nella chiave
         cache.set_search_results(
             results=response_data,
-            query=request.query,
-            categoria=request.categoria.value if request.categoria else None,
-            prezzo_max=request.prezzo_max,
-            regione=request.regione
+            **cache_key_params
         )
 
         # Salva anche i singoli listing in cache
-        for listing in listings:
+        for listing in all_listings:
             if listing.listing_id:
                 cache.set_listing(
                     listing_id=listing.listing_id,

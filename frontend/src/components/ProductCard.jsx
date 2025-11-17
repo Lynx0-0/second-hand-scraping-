@@ -35,6 +35,16 @@ export default function ProductCard({ listing }) {
             className="w-full h-48 object-cover"
           />
 
+          {/* Platform Badge */}
+          <div className="absolute top-2 left-2">
+            <span className={`
+              px-2 py-1 rounded-md text-xs font-bold text-white shadow-lg
+              ${listing.source === 'ebay' ? 'bg-yellow-500' : 'bg-blue-500'}
+            `}>
+              {listing.source === 'ebay' ? '🌍 eBay' : '🇮🇹 Subito'}
+            </span>
+          </div>
+
           {/* Scam Badge Overlay */}
           {scamData.riskLevel !== 'low' && (
             <div className="absolute top-2 right-2">
