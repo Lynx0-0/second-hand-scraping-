@@ -9,17 +9,45 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 import redis
 
-from api.models.requests import SearchRequest
+from api.models.requests import SearchRequest, PlatformEnum
 from api.models.responses import SearchResponse, ListingResponse
-from api.core.dependencies import get_redis_client, get_scraper
+from api.core.dependencies import get_redis_client
+from api.core.config import settings
 from api.services.cache import CacheService
 from src.scraper.subito_scraper import SubitoScraper
+from src.scraper.ebay_scraper import EbayScraper
+from src.config.settings import ScraperConfig
 from src.models.listing import Listing
 
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["search"])
+
+
+def _create_scraper(platform: PlatformEnum):
+    """
+    Crea l'istanza dello scraper corretto in base alla piattaforma.
+
+    Args:
+        platform: Piattaforma richiesta
+
+    Returns:
+        Scraper instance (SubitoScraper o EbayScraper)
+    """
+    config = ScraperConfig(
+        requests_per_second=settings.SCRAPER_REQUESTS_PER_SECOND,
+        min_delay=settings.SCRAPER_MIN_DELAY,
+        max_delay=settings.SCRAPER_MAX_DELAY,
+        max_retries=settings.SCRAPER_MAX_RETRIES,
+        request_timeout=settings.SCRAPER_TIMEOUT,
+        log_level=settings.LOG_LEVEL
+    )
+
+    if platform == PlatformEnum.EBAY:
+        return EbayScraper(config)
+    else:  # Default: Subito
+        return SubitoScraper(config)
 
 
 def _filter_by_price(listings: List[Listing], max_price: float) -> List[Listing]:

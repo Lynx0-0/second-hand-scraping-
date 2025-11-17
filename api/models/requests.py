@@ -5,6 +5,13 @@ from typing import Optional
 from enum import Enum
 
 
+class PlatformEnum(str, Enum):
+    """Piattaforme supportate."""
+    SUBITO = "subito"
+    EBAY = "ebay"
+    ALL = "all"  # Cerca su entrambe
+
+
 class CategoryEnum(str, Enum):
     """Categorie supportate da Subito.it."""
     ELETTRONICA = "elettronica"
@@ -34,6 +41,12 @@ class SearchRequest(BaseModel):
         example="iphone 13"
     )
 
+    platform: PlatformEnum = Field(
+        PlatformEnum.SUBITO,
+        description="Piattaforma di ricerca (subito/ebay/all)",
+        example="subito"
+    )
+
     categoria: Optional[CategoryEnum] = Field(
         None,
         description="Categoria di ricerca",
@@ -52,7 +65,7 @@ class SearchRequest(BaseModel):
         None,
         min_length=3,
         max_length=50,
-        description="Regione di ricerca",
+        description="Regione di ricerca (solo per Subito.it)",
         example="lazio"
     )
 
@@ -140,9 +153,11 @@ class ReportScamRequest(BaseModel):
 
     @validator('listing_url')
     def validate_listing_url(cls, v):
-        """Valida che l'URL sia di Subito.it."""
-        if 'subito.it' not in str(v).lower():
-            raise ValueError("L'URL deve essere di Subito.it")
+        """Valida che l'URL sia di una piattaforma supportata."""
+        url_str = str(v).lower()
+        supported_platforms = ['subito.it', 'ebay.it', 'ebay.com']
+        if not any(platform in url_str for platform in supported_platforms):
+            raise ValueError("L'URL deve essere di una piattaforma supportata (Subito.it o eBay)")
         return v
 
     @validator('reporter_email')
